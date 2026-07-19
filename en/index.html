@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LABORYA — AI Workers for Small Businesses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D1A;
+    --panel:#12162A;
+    --panel-2:#161B33;
+    --panel-hover:#1A2039;
+    --border:rgba(255,255,255,0.07);
+    --border-strong:rgba(255,255,255,0.14);
+    --blue:#4C2A85;
+    --purple:#7C4FC7;
+    --white:#F3EFE6;
+    --muted:#B7AFC7;
+    --faint:#8B84A0;
+    --gold:#D4AF37;
+    --gold-soft:#E3C468;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+  body{
+    margin:0; background:var(--bg); color:var(--white);
+    font-family:'Manrope',sans-serif; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden; position:relative; line-height:1.6;
+  }
+  ::selection{background:var(--blue); color:#fff;}
+  a{color:inherit; text-decoration:none;}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif; font-weight:500; margin:0; letter-spacing:-.01em;}
+  h1 em, h2 em{font-style:italic; color:var(--gold-soft);}
+
+  .glow{position:absolute; border-radius:50%; filter:blur(140px); pointer-events:none; z-index:0;}
+  .glow-1{width:560px; height:560px; background:var(--blue); opacity:.08; top:-200px; right:-160px;}
+  .glow-2{width:480px; height:480px; background:var(--purple); opacity:.06; bottom:-160px; left:-200px;}
+
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--muted); display:flex; align-items:center; gap:.7em;
+  }
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--gold); display:inline-block;}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px; position:relative; z-index:2;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  section{padding:150px 0; position:relative; overflow:hidden;}
+  @media (max-width:900px){ section{padding:100px 0;} }
+  @media (max-width:640px){ section{padding:76px 0;} }
+
+  /* ---------- NAV ---------- */
+  header.site-nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,12,18,0.75); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 32px; max-width:1180px; margin:0 auto;}
+  .logo{display:flex; align-items:center; gap:12px;}
+  .logo svg{width:36px; height:36px;}
+  .logo-word{font-family:'Cormorant Garamond', serif; font-size:27px; letter-spacing:.05em; color:var(--white);}
+  .logo-word b{color:var(--gold); font-weight:600;}
+
+  /* ---------- SPLASH / INTRO TEASER (door-opening effect) ---------- */
+  .splash{
+    position:fixed; inset:0; z-index:9999;
+    pointer-events:none;
+  }
+  .splash.active{pointer-events:auto;}
+  .splash-door{
+    position:absolute; top:0; bottom:0; width:50%; background:var(--bg);
+    transition:transform 1.1s cubic-bezier(.76,0,.24,1);
+  }
+  .splash-door::before{
+    content:""; position:absolute; top:0; bottom:0; width:520px; height:520px; margin:auto 0;
+    border-radius:50%; background:var(--gold); opacity:.06; filter:blur(150px); pointer-events:none;
+  }
+  .splash-door-left{left:0;}
+  .splash-door-left::before{right:-260px;}
+  .splash-door-right{right:0;}
+  .splash-door-right::before{left:-260px;}
+  .splash.hide .splash-door-left{transform:translateX(-100%);}
+  .splash.hide .splash-door-right{transform:translateX(100%);}
+
+  .splash-content{
+    position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:20px; transition:opacity .45s ease;
+  }
+  .splash.hide .splash-content{opacity:0;}
+  .splash-logo{opacity:0; transform:scale(.82); animation:splashPop .9s cubic-bezier(.2,.8,.2,1) forwards;}
+  .splash-logo svg{width:68px; height:68px;}
+  .splash-word{
+    font-family:'Cormorant Garamond', serif; font-size:2.6rem;
+    letter-spacing:.08em; color:var(--white); opacity:0; transform:translateY(10px);
+    animation:splashRise .9s ease .18s forwards;
+  }
+  .splash-word b{color:var(--gold); font-weight:600;}
+  .splash-tag{
+    font-family:'JetBrains Mono', monospace; font-size:.72rem;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--muted); opacity:0;
+    animation:splashRise .9s ease .34s forwards;
+  }
+  @keyframes splashPop{to{opacity:1; transform:scale(1);}}
+  @keyframes splashRise{to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){
+    .splash-logo, .splash-word, .splash-tag{animation:none !important; opacity:1 !important; transform:none !important;}
+    .splash-door{transition:none !important;}
+  }
+  nav ul{list-style:none; display:flex; gap:28px; margin:0; padding:0; font-size:.87rem;}
+  nav ul a{opacity:.65; transition:opacity .2s ease; color:var(--white);}
+  nav ul a:hover{opacity:1;}
+  nav ul a:focus-visible{outline:2px solid var(--blue); outline-offset:4px;}
+  .nav-links{display:flex; align-items:center; gap:32px;}
+  @media (max-width:860px){ .nav-links, nav ul{display:none;} }
+
+  .btn{
+    font-family:'Manrope', sans-serif; font-weight:600; font-size:.85rem;
+    padding:11px 22px; border-radius:9px; display:inline-block;
+    transition:transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+    border:1px solid transparent;
+  }
+  .btn:focus-visible{outline:2px solid var(--blue); outline-offset:3px;}
+  .btn-primary{background:var(--white); color:#0A0D1A;}
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 8px 22px rgba(245,246,248,0.12);}
+  .btn-ghost{background:rgba(255,255,255,0.02); color:var(--white); border-color:var(--border-strong);}
+  .btn-ghost:hover{border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);}
+  .cta-row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding-top:88px; padding-bottom:140px;}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:64px; align-items:center; margin-top:48px;}
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr; gap:56px;} }
+  .hero-kicker{
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-weight:500;
+    font-size:1.35rem; color:var(--gold-soft); margin:22px 0 6px;
+  }
+  .hero h1{font-size:clamp(2.6rem,5.2vw,3.8rem); line-height:1.1; margin:0 0 26px; max-width:14ch;}
+  .hero .sub{font-size:1.08rem; max-width:46ch; color:var(--muted); margin-bottom:38px;}
+  .support-line{
+    margin-top:32px; font-size:.92rem; color:var(--faint); max-width:42ch;
+  }
+
+  /* ---------- ACTIVITY PANEL ---------- */
+  .activity-panel{
+    background:var(--panel); border:1px solid var(--border-strong); border-radius:20px;
+    padding:26px; max-width:400px; margin:0 auto;
+    box-shadow:0 30px 60px rgba(0,0,0,0.4);
+  }
+  .activity-head{display:flex; align-items:center; gap:13px; margin-bottom:18px;}
+  .activity-avatar{
+    width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--blue), var(--purple));
+    font-family:'Cormorant Garamond', serif; font-weight:700; color:#fff; font-size:17px; flex-shrink:0;
+  }
+  .activity-name{font-weight:700; font-size:.98rem; color:var(--white);}
+  .activity-status{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--muted); display:flex; align-items:center; gap:6px; margin-top:2px;}
+  #statusText{transition:opacity .3s ease;}
+  .live-dot{width:6px; height:6px; border-radius:50%; background:var(--gold); display:inline-block; animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
+  .activity-divider{height:1px; background:var(--border); margin-bottom:20px;}
+  .activity-feed{min-height:270px; max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:11px; transition:opacity .6s ease; scrollbar-width:none;}
+  .activity-feed::-webkit-scrollbar{display:none;}
+  .activity-feed.fade-out{opacity:0;}
+
+  .arow{display:flex;}
+  .arow.out{justify-content:flex-end;}
+  .abubble{
+    max-width:84%; padding:12px 16px; border-radius:14px; font-size:.88rem; line-height:1.42;
+    white-space:pre-line;
+    opacity:0; transform:translateY(8px) scale(.98); transition:opacity .45s ease, transform .45s ease;
+  }
+  .arow.show .abubble{opacity:1; transform:translateY(0) scale(1);}
+  .abubble.in{background:rgba(255,255,255,0.045); color:var(--white);}
+  .abubble.out{background:linear-gradient(135deg, var(--blue), var(--purple)); color:#fff;}
+  .abubble.typing{display:flex; gap:4px; padding:13px 17px; align-items:center;}
+  .abubble.typing span{width:5px; height:5px; border-radius:50%; background:var(--muted); display:inline-block; animation:typingBounce 1s infinite ease-in-out;}
+  .abubble.typing span:nth-child(2){animation-delay:.15s;}
+  .abubble.typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes typingBounce{0%,60%,100%{transform:translateY(0); opacity:.4;} 30%{transform:translateY(-3px); opacity:1;}}
+
+  .astatus{
+    display:flex; align-items:center; gap:8px; justify-content:center; align-self:center;
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--muted);
+    padding:7px 14px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    width:fit-content; max-width:92%; text-align:center;
+    opacity:0; transform:translateY(6px); transition:opacity .45s ease, transform .45s ease;
+  }
+  .astatus.show{opacity:1; transform:translateY(0);}
+  .astatus .adot{width:5px; height:5px; border-radius:50%; background:var(--gold-soft); display:inline-block; animation:pulse 1.4s ease-in-out infinite; flex-shrink:0;}
+
+  .alog{
+    display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace; font-size:.76rem;
+    color:var(--muted); padding:3px 2px; opacity:0; transform:translateY(6px);
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .alog.show{opacity:1; transform:translateY(0);}
+  .alog-icon{font-size:.85rem;}
+  .alog-text{flex:1; color:var(--white); opacity:.82;}
+  .alog-tick{color:var(--gold-soft);}
+
+  /* ---------- SECTION HEAD ---------- */
+  .section-head{max-width:640px; margin-bottom:56px;}
+  .section-head h2{font-size:clamp(1.9rem,3.4vw,2.5rem); margin-top:16px;}
+  .section-head p{max-width:60ch; color:var(--muted); margin-top:16px; font-size:1rem;}
+
+  /* ---------- PANEL / CARD SYSTEM (shared) ---------- */
+  .panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    padding:32px; transition:transform .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .panel:hover{transform:translateY(-3px); border-color:var(--border-strong); background:var(--panel-hover);}
+  .panel h3{font-family:'Manrope',sans-serif; font-weight:700; font-size:1.02rem; margin-bottom:10px; color:var(--white);}
+  .panel p{font-size:.92rem; color:var(--muted); margin:0;}
+  .panel .glyph{font-family:'JetBrains Mono',monospace; font-size:.66rem; color:var(--gold); letter-spacing:.08em; text-transform:uppercase; margin-bottom:16px;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  @media (max-width:900px){ .card-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:520px){ .card-grid{grid-template-columns:1fr;} }
+
+  .benefit-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  @media (max-width:900px){ .benefit-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .benefit-grid{grid-template-columns:1fr;} }
+
+  .why-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:56px;}
+  @media (max-width:900px){ .why-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .why-grid{grid-template-columns:1fr;} }
+
+  .partner-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:52px;}
+  @media (max-width:900px){ .partner-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .partner-grid{grid-template-columns:1fr;} }
+
+  .audience-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:52px;}
+  @media (max-width:900px){ .audience-grid{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- SOLUTION ---------- */
+  .solution-grid{display:grid; grid-template-columns:.95fr 1.05fr; gap:64px; align-items:start;}
+  @media (max-width:900px){ .solution-grid{grid-template-columns:1fr;} }
+  .worker-card{
+    border:1px solid var(--border-strong); border-radius:18px; padding:34px;
+    background:var(--panel); box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .worker-card .role{font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--gold); letter-spacing:.1em; text-transform:uppercase;}
+  .worker-card h3{font-size:1.9rem; margin:10px 0 20px; font-family:'Cormorant Garamond',serif;}
+  .feature-list{list-style:none; margin:22px 0 0; padding:0;}
+  .feature-list li{display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--border); font-size:.92rem; color:var(--muted);}
+  .feature-list li:first-child{border-top:none;}
+  .feature-list li::before{content:"—"; color:var(--gold); font-size:.8rem; margin-top:1px;}
+  .solution-copy p{color:var(--muted); margin-bottom:18px;}
+  .solution-copy h2{font-size:clamp(1.9rem,3.6vw,2.6rem); margin:18px 0 24px;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .flow-steps{display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin-top:60px;}
+  @media (max-width:900px){ .flow-steps{grid-template-columns:1fr;} }
+  .flow-step{padding:26px 22px; border:1px solid var(--border); border-radius:16px; background:var(--panel); transition:transform .25s ease, border-color .25s ease;}
+  .flow-step:hover{transform:translateY(-3px); border-color:var(--border-strong);}
+  .flow-step .num{font-family:'JetBrains Mono',monospace; color:var(--gold); font-size:.76rem; margin-bottom:12px;}
+  .flow-step h3{font-size:1rem; margin-bottom:8px; font-weight:700; font-family:'Manrope',sans-serif; color:var(--white);}
+  .flow-step p{font-size:.85rem; color:var(--muted); margin:0;}
+
+  /* ---------- USE CASE ---------- */
+  .usecase-grid{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;}
+  @media (max-width:900px){ .usecase-grid{grid-template-columns:1fr;} }
+  .tag-row{display:flex; flex-wrap:wrap; gap:9px; margin-top:28px;}
+  .tag{font-family:'JetBrains Mono',monospace; font-size:.7rem; padding:8px 14px; border:1px solid var(--border-strong); border-radius:20px; color:var(--muted); background:rgba(255,255,255,0.02);}
+  .quote-block{border-left:2px solid var(--gold); padding:6px 0 6px 22px; margin-top:32px; font-family:'Cormorant Garamond', serif; font-style:italic; font-size:1.3rem; color:var(--white);}
+
+  /* ---------- ROADMAP ---------- */
+  .roadmap-track{display:flex; gap:18px; overflow-x:auto; margin-top:52px; padding-bottom:14px; scrollbar-width:thin;}
+  .roadmap-item{
+    min-width:230px; padding:26px 24px; flex-shrink:0; border-radius:16px;
+    border:1px solid var(--border); background:var(--panel);
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .roadmap-item:hover{transform:translateY(-3px); border-color:var(--border-strong);}
+  .roadmap-item .idx{font-family:'JetBrains Mono',monospace; color:var(--gold); font-size:.7rem; margin-bottom:12px;}
+  .roadmap-item h3{font-size:1.02rem; margin-bottom:8px; font-family:'Manrope',sans-serif; font-weight:700; color:var(--white);}
+  .roadmap-item p{font-size:.85rem; color:var(--muted); margin:0;}
+  .roadmap-item.current{background:linear-gradient(165deg, rgba(94,106,210,0.16), var(--panel)); border-color:var(--border-strong);}
+  .disclaimer{font-size:.78rem; color:var(--faint); margin-top:20px; font-style:italic; font-family:'Cormorant Garamond',serif;}
+
+  /* ---------- STRATEGIC STATEMENT ---------- */
+  .strategic-statement{
+    margin-top:48px; padding:34px; background:var(--panel); border:1px solid var(--border-strong);
+    border-radius:18px; font-family:'Cormorant Garamond', serif; font-size:1.25rem; font-style:italic;
+    line-height:1.55; color:var(--white);
+  }
+
+  /* ---------- PROOF ---------- */
+  .proof-inner{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start;}
+  @media (max-width:900px){ .proof-inner{grid-template-columns:1fr;} }
+  .proof-points{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .proof-point{font-family:'JetBrains Mono',monospace; font-size:.76rem; padding:9px 15px; border:1px solid var(--border-strong); border-radius:20px; color:var(--white); background:rgba(255,255,255,0.02);}
+  .proof-copy p{color:var(--muted);}
+  .proof-copy .support{margin-top:22px; font-family:'Cormorant Garamond', serif; font-style:italic; color:var(--gold-soft); font-size:1.1rem;}
+
+  /* ---------- FINAL CTA ---------- */
+  .final{text-align:center;}
+  .final h2{font-size:clamp(2.1rem,4.4vw,3.2rem); max-width:16ch; margin:16px auto 24px;}
+  .final p{max-width:52ch; margin:0 auto 36px; color:var(--muted);}
+  .final .cta-row{justify-content:center;}
+  .final .micro{margin-top:30px; font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--faint); letter-spacing:.04em;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--panel-2); border-top:1px solid var(--border); padding:60px 0 32px; position:relative; z-index:2;}
+  .footer-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:30px; padding-bottom:38px; border-bottom:1px solid var(--border);}
+  .footer-logo{font-family:'Cormorant Garamond', serif; font-weight:700; font-size:1.15rem; color:var(--white);}
+  .footer-logo b{color:var(--gold);}
+  .footer-tag{font-size:.9rem; margin-top:8px; max-width:32ch; color:var(--muted);}
+  footer nav ul{gap:22px; list-style:none; padding:0; display:flex; font-size:.86rem;}
+  footer nav ul a{color:var(--muted);}
+  footer nav ul a:hover{color:var(--white);}
+  .footer-note{padding-top:26px; font-size:.74rem; font-family:'JetBrains Mono',monospace; color:var(--faint);}
+
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.visible{opacity:1; transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="splash active" id="splashScreen">
+  <div class="splash-door splash-door-left"></div>
+  <div class="splash-door splash-door-right"></div>
+  <div class="splash-content">
+    <div class="splash-logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="#D4AF37" stroke-width="1"/>
+        <path d="M11 21V11.5L16 16.5L21 11.5V21" stroke="#D4AF37" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="16" cy="9" r="1.6" fill="#D4AF37"/>
+      </svg>
+    </div>
+    <div class="splash-word">LAB<b>O</b>RYA</div>
+    <div class="splash-tag">AI Workers for Small Businesses</div>
+  </div>
+</div>
+<script>document.body.style.overflow='hidden';</script>
+
+<header class="site-nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="#D4AF37" stroke-width="1"/>
+        <path d="M11 21V11.5L16 16.5L21 11.5V21" stroke="#D4AF37" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="16" cy="9" r="1.6" fill="#D4AF37"/>
+      </svg>
+      <span class="logo-word">LAB<b>O</b>RYA</span>
+    </div>
+    <div class="nav-links">
+      <nav>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#sofia">Sofia</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#usecases">Use cases</a></li>
+          <li><a href="#partners">Partners</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <a href="#contact" class="btn btn-primary">Request a Demo</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Built in Portugal · Designed for SMEs · Powered by AI agents</div>
+      <p class="hero-kicker">Meet Sofia.</p>
+      <h1>Digital labor already <em>replied</em> to your last message.</h1>
+      <p class="sub">LABORYA builds digital teammates for small businesses — starting with Sofia, who answers, books and follows up with customers over WhatsApp, and never sleeps.</p>
+      <div class="cta-row">
+        <a href="#contact" class="btn btn-primary">Meet Sofia</a>
+        <a href="#sofia" class="btn btn-ghost">Book a conversation</a>
+      </div>
+      <p class="support-line">We turn repetitive manual work into humanized, automated and measurable execution.</p>
+    </div>
+
+    <div>
+      <div class="activity-panel">
+        <div class="activity-head">
+          <div class="activity-avatar">S</div>
+          <div>
+            <div class="activity-name">Sofia</div>
+            <div class="activity-status"><span class="live-dot"></span><span id="statusText">a trabalhar agora</span></div>
+          </div>
+        </div>
+        <div class="activity-divider"></div>
+        <div class="activity-feed" id="activityFeed"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">The problem</div>
+      <h2>Small businesses are drowning in manual work.</h2>
+      <p>For many local businesses, the biggest problem is not lack of demand. It is operational overload. Business owners spend hours every day answering WhatsApp messages, confirming appointments, handling cancellations, repeating prices, updating spreadsheets, checking payments and trying to understand their own numbers.</p>
+      <p>Every unanswered message can become a lost customer. Every missed follow-up can become lost revenue. Every manual process becomes a hidden cost.</p>
+    </div>
+    <div class="card-grid reveal">
+      <div class="panel"><div class="glyph">Message</div><h3>Customers expect instant replies</h3><p>But business owners cannot stay on the phone all day.</p></div>
+      <div class="panel"><div class="glyph">Calendar</div><h3>Manual scheduling creates mistakes</h3><p>Appointments, confirmations and cancellations quickly become hard to manage.</p></div>
+      <div class="panel"><div class="glyph">Database</div><h3>Business data is scattered</h3><p>Client history, service records, payments and insights are often split between WhatsApp, calendars and spreadsheets.</p></div>
+      <div class="panel"><div class="glyph">Chart</div><h3>Financial visibility comes too late</h3><p>Many small businesses only understand what happened after the month is already over.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="sofia">
+  <div class="wrap solution-grid">
+    <div class="solution-copy reveal">
+      <div class="eyebrow">The solution</div>
+      <h2>Meet Sofia, the first LABORYA <em>AI Worker</em>.</h2>
+      <p>Sofia is an AI business assistant designed to work inside the channels small businesses already use — starting with WhatsApp.</p>
+      <p>She talks to customers naturally, answers questions, helps with bookings, confirms appointments, sends reminders, supports post-service workflows and records operational data that can become business intelligence.</p>
+      <p>Sofia is not a generic chatbot. She is a specialized digital worker designed for real business routines.</p>
+      <a href="#how" class="btn btn-ghost" style="margin-top:10px;">See how Sofia works</a>
+    </div>
+    <div class="worker-card reveal">
+      <div class="role">Digital worker profile</div>
+      <h3>Sofia</h3>
+      <ul class="feature-list">
+        <li>Humanized WhatsApp conversations</li>
+        <li>24/7 customer response</li>
+        <li>Appointment support and reminders</li>
+        <li>Customer history and contextual memory</li>
+        <li>Post-service records and financial inputs</li>
+        <li>Birthday campaigns and reactivation flows</li>
+        <li>Business insights from daily operations</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="wrap">
+    <div class="section-head reveal" style="max-width:680px;">
+      <div class="eyebrow">How it works</div>
+      <h2>From conversation to <em>execution</em>.</h2>
+      <p>LABORYA combines conversational AI, workflow automation and business context to create digital workers that can execute real tasks. Sofia connects customer conversations, calendars, forms, spreadsheets, automations and business rules into one operational flow.</p>
+    </div>
+    <div class="flow-steps reveal">
+      <div class="flow-step"><div class="num">01</div><h3>Conversation</h3><p>A customer sends a message through WhatsApp.</p></div>
+      <div class="flow-step"><div class="num">02</div><h3>Understanding</h3><p>Sofia understands the request, the context and the business rules.</p></div>
+      <div class="flow-step"><div class="num">03</div><h3>Action</h3><p>She helps answer, schedule, confirm, remind, register or trigger the next step.</p></div>
+      <div class="flow-step"><div class="num">04</div><h3>Notification</h3><p>The business owner receives the information needed to stay in control.</p></div>
+      <div class="flow-step"><div class="num">05</div><h3>Insight</h3><p>Daily operations become structured data for better decisions.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASE -->
+<section id="usecases">
+  <div class="wrap usecase-grid">
+    <div class="reveal">
+      <div class="eyebrow">First vertical</div>
+      <h2 style="font-size:clamp(1.9rem,3.6vw,2.6rem); margin:18px 0 20px;">Starting with beauty and local service businesses.</h2>
+      <p style="color:var(--muted);">LABORYA starts where the operational pain is obvious: beauty salons, aesthetics professionals and appointment-based local service providers. These businesses rely heavily on WhatsApp, personal relationships, recurring customers, appointments, cancellations, service history and financial discipline. That makes them ideal for specialized AI workers.</p>
+      <div class="quote-block">Our focus is not a limitation. It is our go-to-market advantage.</div>
+    </div>
+    <div class="reveal">
+      <div class="tag-row">
+        <span class="tag">High WhatsApp dependency</span>
+        <span class="tag">Frequent appointment requests</span>
+        <span class="tag">Repetitive customer questions</span>
+        <span class="tag">High impact from no-shows</span>
+        <span class="tag">Need for retention and reactivation</span>
+        <span class="tag">Limited time for management and reporting</span>
+        <span class="tag">Strong need for humanized communication</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Business outcomes</div>
+      <h2>What Sofia helps businesses <em>achieve</em>.</h2>
+    </div>
+    <div class="benefit-grid reveal">
+      <div class="panel"><h3>Save time</h3><p>Reduce the hours spent answering repetitive messages and managing manual scheduling.</p></div>
+      <div class="panel"><h3>Capture more opportunities</h3><p>Respond faster to potential customers and reduce lost bookings caused by delayed replies.</p></div>
+      <div class="panel"><h3>Reduce no-shows</h3><p>Use confirmations, reminders and business rules to improve attendance.</p></div>
+      <div class="panel"><h3>Improve retention</h3><p>Reactivate inactive customers, send birthday campaigns and personalize communication.</p></div>
+      <div class="panel"><h3>Create business visibility</h3><p>Turn daily operations into structured data for financial and commercial insights.</p></div>
+      <div class="panel"><h3>Keep the human touch</h3><p>Sofia does not replace the professional's identity. She extends it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY LABORYA -->
+<section>
+  <div class="wrap">
+    <div class="section-head reveal" style="max-width:680px;">
+      <div class="eyebrow">Why LABORYA</div>
+      <h2>Built for <em>execution</em>, not just conversation.</h2>
+      <p>Most AI tools stop at conversation. LABORYA goes further. We design AI workers that understand business context, connect to workflows and help execute real operational tasks. Our mission is to make advanced AI useful for the businesses that need more execution capacity, but do not have large teams, complex systems or technical departments.</p>
+    </div>
+    <div class="why-grid reveal">
+      <div class="panel"><h3>Vertical by design</h3><p>We create agents for specific business contexts, not generic assistants.</p></div>
+      <div class="panel"><h3>WhatsApp-first</h3><p>We start where customers and SMEs already communicate.</p></div>
+      <div class="panel"><h3>Humanized AI</h3><p>The experience is designed to feel natural, not robotic.</p></div>
+      <div class="panel"><h3>Workflow automation</h3><p>Agents are connected to real workflows, not isolated chat windows.</p></div>
+      <div class="panel"><h3>Business memory</h3><p>Customer history, rules and operational data improve the experience over time.</p></div>
+      <div class="panel"><h3>SME adoption</h3><p>The focus is not only technology. It is implementation, adoption and measurable value.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Roadmap</div>
+      <h2>Sofia is only the <em>first</em> AI Worker.</h2>
+      <p>LABORYA's long-term vision is to create a portfolio of specialized AI workers for different business functions. Sofia starts with customer communication, scheduling and local business operations. The same approach can expand into sales, support, finance, operations and HR.</p>
+    </div>
+  </div>
+  <div class="wrap" style="max-width:1180px;">
+    <div class="roadmap-track reveal">
+      <div class="roadmap-item current"><div class="idx">Live</div><h3>Sofia</h3><p>Customer communication, scheduling and local business operations.</p></div>
+      <div class="roadmap-item"><div class="idx">Next</div><h3>Sofia Sales</h3><p>AI worker for lead follow-up, qualification and sales support.</p></div>
+      <div class="roadmap-item"><div class="idx">Next</div><h3>Sofia Support</h3><p>AI worker for customer service and FAQ handling.</p></div>
+      <div class="roadmap-item"><div class="idx">Next</div><h3>Sofia Finance</h3><p>AI worker for financial organization, reporting and business insights.</p></div>
+      <div class="roadmap-item"><div class="idx">Next</div><h3>Sofia Operations</h3><p>AI worker for internal workflows, task tracking and operational routines.</p></div>
+      <div class="roadmap-item"><div class="idx">Next</div><h3>Sofia HR</h3><p>AI worker for recruitment support, onboarding and internal documentation.</p></div>
+    </div>
+    <p class="disclaimer">Roadmap concepts are under development and may evolve based on customer validation and strategic partnerships.</p>
+  </div>
+</section>
+
+<!-- PARTNERS -->
+<section id="partners">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">For partners</div>
+      <h2>A real-world AI Workforce use case in <em>Portugal</em>.</h2>
+      <p>LABORYA aims to become a real-world implementation layer for AI agents in Portuguese SMEs. As platforms like TESS accelerate the creation of autonomous agents, LABORYA can help bring those capabilities into practical business contexts: WhatsApp-first workflows, local service operations, customer communication, sales automation and SME adoption.</p>
+    </div>
+    <div class="eyebrow reveal" style="margin-bottom:0;">How LABORYA can help AI platforms grow in Portugal</div>
+    <div class="partner-grid reveal">
+      <div class="panel"><h3>European showcase</h3><p>Build a real AI Workforce case study with Portuguese SMEs.</p></div>
+      <div class="panel"><h3>Structured feedback</h3><p>Provide product feedback from real-world SME implementations.</p></div>
+      <div class="panel"><h3>Reusable templates</h3><p>Create repeatable agent templates for sales, support, operations and finance.</p></div>
+      <div class="panel"><h3>Adoption content</h3><p>Produce case studies, tutorials and business-oriented implementation content.</p></div>
+      <div class="panel"><h3>Local market knowledge</h3><p>Translate advanced AI capabilities into practical workflows for Portuguese businesses.</p></div>
+      <div class="panel"><h3>Implementation partner potential</h3><p>Explore a future implementation partner model for Portugal and the Iberian market.</p></div>
+    </div>
+    <div class="strategic-statement reveal">
+      "We believe LABORYA can help platforms like TESS grow in Portugal by turning advanced AI agent capabilities into real SME implementations. In return, platforms like TESS can become part of the technology layer accelerating LABORYA's AI Workforce vision."
+    </div>
+    <div style="margin-top:36px;">
+      <a href="#contact" class="btn btn-primary">Let's explore a partnership</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section>
+  <div class="wrap proof-inner">
+    <div class="proof-copy reveal">
+      <div class="eyebrow">Execution</div>
+      <h2 style="font-size:clamp(1.9rem,3.6vw,2.6rem); margin:18px 0 20px;">From concept to structured <em>execution</em>.</h2>
+      <p>LABORYA is not starting from a blank page. The company already has structured documentation covering strategy, product vision, sales materials, technical architecture, marketing assets, investor materials and operational data models.</p>
+      <p class="support">We are building with structure from day one.</p>
+    </div>
+    <div class="reveal">
+      <div class="proof-points">
+        <span class="proof-point">Product vision</span>
+        <span class="proof-point">Sales playbook</span>
+        <span class="proof-point">Technical architecture</span>
+        <span class="proof-point">Marketing assets</span>
+        <span class="proof-point">Investor materials</span>
+        <span class="proof-point">Data models</span>
+        <span class="proof-point">Roadmap</span>
+        <span class="proof-point">Governance documentation</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Who it is for</div>
+      <h2>Designed for lean teams that need more <em>execution capacity</em>.</h2>
+    </div>
+    <div class="audience-grid reveal">
+      <div class="panel"><h3>Local businesses</h3><p>Beauty salons, aesthetics professionals and appointment-based service providers.</p></div>
+      <div class="panel"><h3>SMEs</h3><p>Small and medium businesses that need automation without complex software.</p></div>
+      <div class="panel"><h3>Partners</h3><p>AI platforms, accelerators and technology companies looking for real implementation use cases.</p></div>
+      <div class="panel"><h3>Investors</h3><p>Early-stage investors interested in AI Workforce, vertical SaaS and practical automation for SMEs.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final" id="contact">
+  <div class="glow glow-1" style="left:50%; right:auto; transform:translateX(-50%); top:-260px;"></div>
+  <div class="wrap">
+    <div class="eyebrow" style="justify-content:center;">Let's talk</div>
+    <h2>Let's build the future of work for <em>small businesses</em>.</h2>
+    <p>LABORYA is looking for early partners, technology platforms, accelerators and forward-thinking businesses that want to explore practical AI Workforce implementation. If you are building, investing in or adopting AI agents for real businesses, we would love to talk.</p>
+    <div class="cta-row">
+      <a href="mailto:hello@uselaborya.com" class="btn btn-primary">Contact LABORYA</a>
+      <a href="#sofia" class="btn btn-ghost">Book a Sofia Demo</a>
+    </div>
+    <div class="micro">Based in Portugal. Building for SMEs. Ready for strategic partnerships.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">LAB<b>O</b>RYA</div>
+        <div class="footer-tag">AI Workers for Small Businesses. Built in Portugal.</div>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#sofia">Sofia</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#usecases">Use cases</a></li>
+          <li><a href="#partners">Partners</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-note">© 2026 LABORYA. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  // scroll reveal
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+  // ---------- Sofia live panel ----------
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const feed = document.getElementById('activityFeed');
+  const statusText = document.getElementById('statusText');
+
+  // rotating "what Sofia is doing" status line, independent of the conversation
+  const statusMessages = [
+    'working right now',
+    'helping Bela Vista Studio',
+    'replying on WhatsApp',
+    'booking appointments',
+    'updating client records',
+    'preparing tomorrow\'s reminders',
+    'managing today\'s bookings'
+  ];
+  let statusIndex = 0;
+  setInterval(()=>{
+    statusText.style.opacity = 0;
+    setTimeout(()=>{
+      statusIndex = (statusIndex + 1) % statusMessages.length;
+      statusText.textContent = statusMessages[statusIndex];
+      statusText.style.opacity = 1;
+    }, 300);
+  }, 4600);
+
+  // each scenario is a natural front-desk conversation, interleaved with
+  // progressive operational status updates. Sofia never jumps straight
+  // to the solution: she acknowledges, checks, then offers.
+  const scenarios = [
+    // 1 — new booking
+    [
+      {type:'in',  text:'Hi 👋 I\'d love to book a gel manicure next week. Do you have anything after 6pm?'},
+      {type:'typing'},
+      {type:'out', text:'Hi Sarah 😊 Of course! Give me a moment while I check Amanda\'s calendar.'},
+      {type:'status', icon:'📅', text:'Checking the calendar…'},
+      {type:'typing'},
+      {type:'out', text:'Great news ✨ Amanda has two available times:\n• Tuesday — 18:30\n• Thursday — 19:00\nWhich one would you prefer?'},
+      {type:'in',  text:'Tuesday ❤️'},
+      {type:'typing'},
+      {type:'status', icon:'📅', text:'Appointment added to calendar'},
+      {type:'typing'},
+      {type:'out', text:'Perfect! You\'re booked for Tuesday at 18:30. I\'ll also send a reminder the day before. See you then 😊'},
+      {type:'status', icon:'🔔', text:'Reminder scheduled'},
+      {type:'status', icon:'📊', text:'Daily dashboard updated'}
+    ],
+    // 2 — reschedule
+    [
+      {type:'in',  text:'Hi! Could I move my manicure from tomorrow to Friday?'},
+      {type:'typing'},
+      {type:'out', text:'No problem, Inês 🙂 Let me check what\'s free on Friday.'},
+      {type:'status', icon:'📅', text:'Checking availability…'},
+      {type:'typing'},
+      {type:'out', text:'Amanda has an opening Friday at 16:00 or 17:30. Does either work?'},
+      {type:'in',  text:'17:30, thank you!'},
+      {type:'typing'},
+      {type:'status', icon:'📅', text:'Appointment updated in calendar'},
+      {type:'out', text:'All set ✅ Friday at 17:30. See you there!'},
+      {type:'status', icon:'👤', text:'Client record updated'}
+    ],
+    // 3 — cancellation
+    [
+      {type:'in',  text:'Good morning, I\'m afraid I need to cancel my appointment today 😕'},
+      {type:'typing'},
+      {type:'out', text:'No worries at all, Beatriz. Thanks for the heads-up 💛'},
+      {type:'status', icon:'📅', text:'Slot released on calendar'},
+      {type:'typing'},
+      {type:'out', text:'Would you like me to suggest a new day now, or would you rather choose later?'},
+      {type:'in',  text:'I\'ll choose later, thanks!'},
+      {type:'typing'},
+      {type:'out', text:'Perfect, I\'ll be here 🙂 Just reach out whenever you\'re ready.'},
+      {type:'status', icon:'👤', text:'Client history updated'}
+    ],
+    // 4 — birthday campaign (Sofia reaches out first)
+    [
+      {type:'out', text:'Hi Marta 🎉 Today\'s a special day — happy birthday! As a gift, you\'ve got 15% off any service this week.'},
+      {type:'status', icon:'🎂', text:'Birthday campaign sent'},
+      {type:'typing'},
+      {type:'in',  text:'Aw, thank you! 😍 Could I book for Saturday?'},
+      {type:'typing'},
+      {type:'out', text:'Of course! Let me check Saturday\'s schedule for you.'},
+      {type:'status', icon:'📅', text:'Checking Saturday\'s calendar…'},
+      {type:'typing'},
+      {type:'out', text:'You\'ve got 11:00 free ✨ Shall I lock that in with your birthday discount?'},
+      {type:'in',  text:'Yes, please! 🎉'},
+      {type:'status', icon:'📅', text:'Discounted booking added'},
+      {type:'status', icon:'💰', text:'Revenue forecast updated'}
+    ],
+    // 5 — contextual memory
+    [
+      {type:'in',  text:'I\'d like to book the same as last time 🙂'},
+      {type:'typing'},
+      {type:'status', icon:'👤', text:'Checking client history…'},
+      {type:'out', text:'Of course 😊 Last time you chose the Rose Nude gel polish. Would you like to keep the same shade?'},
+      {type:'in',  text:'Yes, loved it! Keep it.'},
+      {type:'typing'},
+      {type:'out', text:'Perfect, I already know exactly what to prepare ✨ What day works best for you?'},
+      {type:'in',  text:'Thursday afternoon?'},
+      {type:'typing'},
+      {type:'status', icon:'📅', text:'Checking Thursday\'s calendar…'},
+      {type:'out', text:'16:30 is open. Looking forward to seeing you 💅'},
+      {type:'status', icon:'📅', text:'Appointment added to calendar'}
+    ],
+    // 6 — price question
+    [
+      {type:'in',  text:'Good afternoon! How much is a gel manicure?'},
+      {type:'typing'},
+      {type:'out', text:'Good afternoon 😊 A gel manicure is €25, and with simple nail art it\'s €30.'},
+      {type:'in',  text:'Perfect, thanks for the info!'},
+      {type:'typing'},
+      {type:'out', text:'Anytime 💛 If you\'d like to book, just let me know.'},
+      {type:'status', icon:'📊', text:'Enquiry logged'}
+    ],
+    // 7 — availability question (no booking yet)
+    [
+      {type:'in',  text:'What times do you have free this week for a pedicure?'},
+      {type:'typing'},
+      {type:'out', text:'Let me check 🙂 One second…'},
+      {type:'status', icon:'📅', text:'Checking the calendar…'},
+      {type:'typing'},
+      {type:'out', text:'We have Wednesday at 10:00 and Friday at 15:30 available.'},
+      {type:'in',  text:'I\'ll think about it and let you know, thanks!'},
+      {type:'typing'},
+      {type:'out', text:'No rush at all 😊 I\'m here whenever you\'re ready.'}
+    ]
+  ];
+
+  let lastScenario = -1;
+  function pickScenario(){
+    if(scenarios.length === 1) return 0;
+    let idx;
+    do{ idx = Math.floor(Math.random() * scenarios.length); } while(idx === lastScenario);
+    lastScenario = idx;
+    return idx;
+  }
+
+  function buildRow(step, instant){
+    const row = document.createElement('div');
+    if(step.type === 'in'){
+      row.className = 'arow in' + (instant ? ' show' : '');
+      row.innerHTML = `<div class="abubble in">${step.text}</div>`;
+    } else if(step.type === 'out'){
+      row.className = 'arow out' + (instant ? ' show' : '');
+      row.innerHTML = `<div class="abubble out">${step.text}</div>`;
+    } else if(step.type === 'typing'){
+      row.className = 'arow out typing-row';
+      row.innerHTML = `<div class="abubble out typing"><span></span><span></span><span></span></div>`;
+    } else if(step.type === 'status'){
+      row.className = 'astatus' + (instant ? ' show' : '');
+      row.innerHTML = `<span class="adot"></span><span>${step.icon} ${step.text}</span>`;
+    }
+    return row;
+  }
+
+  function renderStatic(){
+    const steps = scenarios[0];
+    feed.innerHTML = '';
+    steps.forEach(step=>{
+      if(step.type === 'typing') return;
+      feed.appendChild(buildRow(step, true));
+    });
+  }
+
+  function delayFor(step){
+    if(step.type === 'typing') return 1100;
+    if(step.type === 'status') return 950;
+    return Math.min(2600, 850 + step.text.length * 16);
+  }
+
+  function runScenario(){
+    const steps = scenarios[pickScenario()];
+    feed.innerHTML = '';
+    let i = 0;
+    function next(){
+      const typingRow = feed.querySelector('.typing-row');
+      if(typingRow) typingRow.remove();
+
+      if(i >= steps.length){
+        setTimeout(()=>{
+          feed.classList.add('fade-out');
+          setTimeout(()=>{ feed.classList.remove('fade-out'); runScenario(); }, 700);
+        }, 3200);
+        return;
+      }
+      const step = steps[i];
+      const row = buildRow(step, false);
+      feed.appendChild(row);
+      requestAnimationFrame(()=>row.classList.add('show'));
+      feed.scrollTop = feed.scrollHeight;
+      const delay = delayFor(step);
+      i++;
+      setTimeout(next, delay);
+    }
+    next();
+  }
+
+  if(reduceMotion){ renderStatic(); }
+  else { runScenario(); }
+</script>
+
+<script>
+  (function(){
+    var splash = document.getElementById('splashScreen');
+    if(!splash) return;
+    var reduceMotionSplash = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function hideSplash(){
+      splash.classList.add('hide');
+      document.body.style.overflow = '';
+      setTimeout(function(){ splash.remove(); }, reduceMotionSplash ? 0 : 1150);
+    }
+    if(reduceMotionSplash){ hideSplash(); }
+    else{ setTimeout(hideSplash, 3000); }
+  })();
+</script>
+
+</body>
+</html>
