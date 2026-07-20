@@ -41,6 +41,7 @@
   .glow{position:absolute; border-radius:50%; filter:blur(140px); pointer-events:none; z-index:0;}
   .glow-1{width:560px; height:560px; background:var(--blue); opacity:.08; top:-200px; right:-160px;}
   .glow-2{width:480px; height:480px; background:var(--purple); opacity:.06; bottom:-160px; left:-200px;}
+  @media (max-width:860px){ .glow{display:none;} }
 
   .eyebrow{
     font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
@@ -59,6 +60,9 @@
     position:sticky; top:0; z-index:50;
     background:rgba(10,12,18,0.75); backdrop-filter:blur(16px);
     border-bottom:1px solid var(--border);
+  }
+  @media (max-width:860px){
+    header.site-nav{background:rgba(10,13,26,0.97); backdrop-filter:none; -webkit-backdrop-filter:none;}
   }
   .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 32px; max-width:1180px; margin:0 auto;}
   .logo{display:flex; align-items:center; gap:12px;}
@@ -123,6 +127,9 @@
     padding:7px 12px; transition:border-color .2s ease, color .2s ease, background .2s ease;
   }
   .lang-switch:hover{color:var(--white); border-color:var(--gold); background:rgba(212,175,55,0.06);}
+  @media (max-width:860px){
+    .splash-door::before, .mobile-menu::before{width:260px; height:260px; filter:blur(70px);}
+  }
 
   /* ---------- MOBILE NAV ---------- */
   .mobile-toggle{
@@ -724,6 +731,13 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const feed = document.getElementById('activityFeed');
   const statusText = document.getElementById('statusText');
+  let panelInView = true;
+  if(feed){
+    const panelObs = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ panelInView = e.isIntersecting; });
+    }, {threshold:0.05});
+    panelObs.observe(feed);
+  }
 
   // rotating "what Sofia is doing" status line, independent of the conversation
   const statusMessages = [
@@ -893,6 +907,7 @@
     feed.innerHTML = '';
     let i = 0;
     function next(){
+      if(!panelInView){ setTimeout(next, 500); return; }
       const typingRow = feed.querySelector('.typing-row');
       if(typingRow) typingRow.remove();
 
