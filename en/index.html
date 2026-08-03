@@ -286,6 +286,44 @@
   @media (max-width:900px){ .audience-grid{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:480px){ .audience-grid{grid-template-columns:1fr;} }
 
+  /* ---------- SOFIA IN ACTION (real screenshots) ---------- */
+  .proof-shots{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:52px;}
+  @media (max-width:900px){ .proof-shots{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .proof-shots{grid-template-columns:1fr;} }
+  .shot-card{border:1px solid var(--border); border-radius:16px; overflow:hidden; background:var(--panel); transition:transform .25s ease, border-color .25s ease;}
+  .shot-card:hover{transform:translateY(-3px); border-color:var(--border-strong);}
+  .shot-card img{display:block; width:100%; height:260px; object-fit:cover; object-position:top;}
+  .shot-card .shot-caption{padding:14px 16px; font-size:.82rem; color:var(--muted); line-height:1.5;}
+
+  /* ---------- FOUNDER ---------- */
+  .founder-grid{display:grid; grid-template-columns:.62fr 1fr; gap:56px; align-items:center;}
+  @media (max-width:860px){ .founder-grid{grid-template-columns:1fr; gap:32px; text-align:center;} }
+  .founder-photo{
+    width:220px; height:220px; border-radius:50%; overflow:hidden; position:relative;
+    border:2px solid var(--gold); margin:0 auto; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .founder-photo img{width:100%; height:100%; object-fit:cover; display:block;}
+  .founder-photo-fallback{
+    width:100%; height:100%; display:none; align-items:center; justify-content:center;
+    font-family:'Cormorant Garamond', serif; font-size:3rem; color:var(--gold); background:var(--panel);
+  }
+  .founder-photo-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .founder-photo-secondary{
+    width:170px; border-radius:12px; overflow:hidden; border:1px solid var(--border-strong);
+    box-shadow:0 14px 30px rgba(0,0,0,0.3);
+  }
+  .founder-photo-secondary img{width:100%; height:auto; display:block;}
+  .founder-photo-caption{
+    font-family:'JetBrains Mono', monospace; font-size:.68rem; color:var(--faint);
+    letter-spacing:.05em; text-align:center;
+  }
+  .founder-copy h2{font-size:clamp(1.9rem,3.4vw,2.5rem); margin:16px 0 18px;}
+  .founder-copy p{color:var(--muted); margin-bottom:20px; max-width:56ch;}
+  @media (max-width:860px){ .founder-copy p{margin-left:auto; margin-right:auto;} }
+  .founder-links{display:flex; gap:14px; flex-wrap:wrap;}
+  @media (max-width:860px){ .founder-links{justify-content:center;} }
+  .founder-links .btn svg{width:16px; height:16px; vertical-align:-3px; margin-right:7px;}
+
   /* ---------- SOLUTION ---------- */
   .solution-grid{display:grid; grid-template-columns:.95fr 1.05fr; gap:64px; align-items:start;}
   @media (max-width:900px){ .solution-grid{grid-template-columns:1fr;} }
@@ -514,6 +552,35 @@
   </div>
 </section>
 
+<!-- SOFIA IN ACTION (real product screenshots) -->
+<section>
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Real product</div>
+      <h2>Sofia <em>in action</em>.</h2>
+      <p>Real conversation captures with Sofia during operational testing of the platform — no staging, no mockups.</p>
+    </div>
+    <div class="proof-shots reveal">
+      <div class="shot-card">
+        <img src="/assets/sofia-servicos.jpg" alt="Sofia informing about available services" loading="lazy">
+        <div class="shot-caption">Sofia informing about available services</div>
+      </div>
+      <div class="shot-card">
+        <img src="/assets/sofia-agendamento.jpg" alt="Sofia confirming availability and registering a booking" loading="lazy">
+        <div class="shot-caption">Sofia confirming availability and registering a booking</div>
+      </div>
+      <div class="shot-card">
+        <img src="/assets/sofia-disponibilidade.jpg" alt="Sofia managing time-slot availability automatically" loading="lazy">
+        <div class="shot-caption">Sofia managing time-slot availability automatically</div>
+      </div>
+      <div class="shot-card">
+        <img src="/assets/sofia-preferencias.jpg" alt="Sofia adjusting times to the client's preference" loading="lazy">
+        <div class="shot-caption">Sofia adjusting times to the client's preference</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- HOW IT WORKS -->
 <section id="how">
   <div class="wrap">
@@ -676,6 +743,36 @@
       <div class="panel"><h3>SMEs</h3><p>Small and medium businesses that need automation without complex software.</p></div>
       <div class="panel"><h3>Partners</h3><p>AI platforms, accelerators and technology companies looking for real implementation use cases.</p></div>
       <div class="panel"><h3>Investors</h3><p>Early-stage investors interested in AI Workforce, vertical SaaS and practical automation for SMEs.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section>
+  <div class="wrap founder-grid">
+    <div class="reveal">
+      <div class="founder-photo-wrap">
+        <div class="founder-photo">
+          <img src="/assets/founder.jpg" alt="Tarcísio Arantes" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="founder-photo-fallback">TA</div>
+        </div>
+        <div class="founder-photo-secondary">
+          <img src="/assets/founder-secondary.jpg" alt="Tarcísio Arantes presenting LABORYA" loading="lazy">
+        </div>
+        <div class="founder-photo-caption">TARCÍSIO ARANTES · FOUNDER</div>
+      </div>
+    </div>
+    <div class="founder-copy reveal">
+      <div class="eyebrow" style="justify-content:center;">The founder</div>
+      <h2>Tarcísio Arantes</h2>
+      <p>Tarcísio Arantes is the founder of LABORYA, based in Setúbal, Portugal. With a background in banking and consulting, he set out to build Sofia — LABORYA's first "digital coworker" — after seeing firsthand how much time small businesses lose to repetitive administrative work. He now leads the company's technical and commercial development, with its first active pilot running at a beauty studio in Portugal.</p>
+      <div class="founder-links">
+        <a href="https://www.linkedin.com/in/tarcisio-arantes" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+          LinkedIn
+        </a>
+        <a href="mailto:hello@uselaborya.com" class="btn btn-ghost">Contact directly</a>
+      </div>
     </div>
   </div>
 </section>
